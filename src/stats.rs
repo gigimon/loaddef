@@ -92,7 +92,7 @@ pub struct SummaryResponse {
     pub total_requests: u64,
     pub total_errors: u64,
     pub total_bytes: u64,
-    pub avg_rps: f64,
+    pub rps_last_second: u64,
     pub by_endpoint: Vec<EndpointSummary>,
     pub by_status: Vec<StatusCount>,
 }
@@ -192,7 +192,7 @@ impl Stats {
     }
 
     pub fn summary(&self) -> SummaryResponse {
-        let (started_at_unix_ms, uptime_seconds, uptime_secs_f64) = {
+        let (started_at_unix_ms, uptime_seconds) = {
             let clock = self.clock.read().expect("clock lock poisoned");
             let started_at_unix_ms = clock
                 .started_at
@@ -201,13 +201,23 @@ impl Stats {
                 .as_millis();
             let elapsed = clock.start_instant.elapsed();
             let uptime_seconds = elapsed.as_secs();
-            let uptime_secs_f64 = elapsed.as_secs_f64().max(0.001);
-            (started_at_unix_ms, uptime_seconds, uptime_secs_f64)
+            (started_at_unix_ms, uptime_seconds)
         };
 
         let total_requests = self.total_requests.load(Ordering::Relaxed);
         let total_errors = self.total_errors.load(Ordering::Relaxed);
         let total_bytes = self.total_bytes.load(Ordering::Relaxed);
+        let rps_second_offset = if uptime_seconds == 0 {
+            0
+        } else {
+            uptime_seconds - 1
+        };
+        let rps_last_second = {
+            let buckets = self.timeseries.lock().expect("timeseries lock poisoned");
+            buckets
+                .get(&rps_second_offset)
+                .map_or(0, |bucket| bucket.requests)
+        };
 
         let mut by_endpoint = self
             .by_endpoint
@@ -265,7 +275,7 @@ impl Stats {
             total_requests,
             total_errors,
             total_bytes,
-            avg_rps: total_requests as f64 / uptime_secs_f64,
+            rps_last_second,
             by_endpoint,
             by_status,
         }

@@ -46,7 +46,7 @@ All metrics are in-memory for current process lifetime and resettable via API.
 
 - `GET /api/stats/summary`
   - Returns global counters and per-endpoint aggregates:
-    - `total_requests`, `total_errors`, `total_bytes`, `avg_rps`
+    - `total_requests`, `total_errors`, `total_bytes`, `rps_last_second`
     - per endpoint: `requests`, `errors`, `bytes`, `p50_ms`, `p95_ms`, `p99_ms`
     - status code distribution
 
@@ -71,7 +71,7 @@ Use identical protocol for each load tool:
 ## Comparable Metrics
 
 Primary metrics:
-- Throughput: achieved RPS (tool-side and server-side average).
+- Throughput: achieved RPS (tool-side average and server-side `rps_last_second` trend).
 - Latency: p50, p95, p99.
 - Error rate: `4xx + 5xx` share.
 - Stability: run-to-run variance on p95/p99 and RPS.
