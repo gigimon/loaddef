@@ -1,8 +1,8 @@
 # bench-server
 
-Небольшой HTTP-сервер на Rust для нагрузочных тестов и сравнения RPS разных фреймворков/инструментов.
+A small Rust HTTP server for load testing and RPS comparison across different frameworks/tools.
 
-## Локальный запуск
+## Local Run
 
 ```bash
 cargo run -- --port 8080
@@ -12,19 +12,19 @@ Dashboard: `http://127.0.0.1:8080/`
 
 ## Docker
 
-Сборка:
+Build:
 
 ```bash
 docker build -t bench-server:local .
 ```
 
-Запуск:
+Run:
 
 ```bash
 docker run --rm -p 8080:8080 bench-server:local
 ```
 
-## Основные эндпоинты
+## Main Endpoints
 
 - `GET /ok` -> `200`
 - `GET /e404` -> `404`
@@ -35,14 +35,14 @@ docker run --rm -p 8080:8080 bench-server:local
 - `GET /api/stats/timeseries`
 - `POST /api/stats/reset`
 
-## CI/CD Docker image
+## CI/CD Docker Image
 
 Workflow: `.github/workflows/docker-image.yml`
 
-- На `push` в `main` и на теги `v*` собирает multi-arch image (`linux/amd64`, `linux/arm64`) и пушит в GHCR.
-- На `pull_request` только собирает image (без push).
-- Путь образа: `ghcr.io/<owner>/<repo>`
+- On `push` to `main` and on `v*` tags, it builds a multi-arch image (`linux/amd64`, `linux/arm64`) and pushes it to GHCR.
+- On `pull_request`, it only builds the image (no push).
+- Image path: `ghcr.io/<owner>/<repo>`
 
-## Контракт бенчмарка
+## Benchmark Contract
 
-См. [docs/benchmark-contract.md](docs/benchmark-contract.md).
+See [docs/benchmark-contract.md](docs/benchmark-contract.md).
